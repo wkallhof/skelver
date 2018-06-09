@@ -1,0 +1,31 @@
+{
+  "name": "skelver-node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "skelver-node": "./src/skelver-node.ts"
+  },
+  "scripts": {
+    "start": "ts-node ./src/skelver-node.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@nestjs/common": "^5.0.1",
+    "@nestjs/core": "^5.0.1",
+    "@types/express": "^4.16.0",
+    "@types/lodash": "^4.14.109",
+    "@types/node": "^10.3.0",
+    "@types/node-rsa": "^0.4.3",
+    "lodash": "^4.17.10",
+    "node-rsa": "^1.0.0",
+    "reflect-metadata": "^0.1.12",
+    "rsa-json": "^0.2.1",
+    "rxjs": "^6.2.0",
+    "ts-node": "^6.1.0",
+    "typed-rest-client": "^1.0.7",
+    "typescript": "^2.9.1"
+  },
+  "devDependencies": {}
+}
