@@ -49,7 +49,7 @@ export class SkelverController extends BaseController {
 
     @Get("pubKey")
     async pubKey() {
-        return this._cryptoService.publicKey;
+        return this._cryptoService.publicKeyHash;
     }
 
     @Post("addPeer")
@@ -60,17 +60,18 @@ export class SkelverController extends BaseController {
         this._peerManager.addPeer(peer);
     }
 
-    @Post("addBlock")
-    async addBlock(@Body() body) {
-        this._blockChainManager.addBlock(new Block({
-            prevHash: "test",
-            hash: "test2",
-            transactions: new Array<Transaction>()
-        }));
-    }
+    // @Post("addBlock")
+    // async addBlock(@Body() body) {
+    //     this._blockChainManager.addBlock(new Block({
+    //         prevHash: "test",
+    //         hash: "test2",
+    //         transactions: new Array<Transaction>()
+    //     }));
+    // }
 
-    @Post("addTransaction")
-    async addTransaction(@Body() transaction: Transaction) {
-        this._transactionManager.addTransaction(transaction);
+    @Post("createTransaction")
+    async createTransaction(@Body() body) {
+        let tx = await this._transactionManager.createTransactionAsync(body.from, body.to, body.amount, this._cryptoService.privateKey);
+        this._transactionManager.addTransaction(tx);
     }
 }

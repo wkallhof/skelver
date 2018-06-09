@@ -15,6 +15,7 @@ import NodeInfo from './services/peers/nodeInfo';
 import Block from './services/blockchain/block';
 import { HttpCommunicator, ICommunicator } from './services/peers/communicator';
 import { TransactionManager, ITransactionManager } from './services/transaction/transactionManager';
+import Miner from './services/miner/miner';
 
 export class SkelverNode {
     private readonly _port: number;
@@ -45,16 +46,22 @@ export class SkelverNode {
         const communicator = new HttpCommunicator();
 
         //initialize peers + blockchain
-        const blockChainManager = new BlockChainManager(stateManager, cryptoService);
-        blockChainManager.initialize(cryptoService.publicKey, cryptoService.privateKey);
         
+
         const peerManager = new PeerManager(stateManager, communicator);
-        const transactionManager = new TransactionManager(stateManager);
+        const transactionManager = new TransactionManager(stateManager, cryptoService);
+        const blockChainManager = new BlockChainManager(stateManager, cryptoService, transactionManager);
+
+        await this.initializeBlockchain(transactionManager, cryptoService);
 
         // start scheduler
         const scheduler = new Scheduler(peerManager, stateManager);
         scheduler.startGossipTask(3000);
         scheduler.startOutputTask(5000);
+
+        // miner
+        const miner = new Miner(transactionManager, blockChainManager, cryptoService, stateManager);
+        miner.start(3000);
 
         // create application module
         this._app = await NestFactory.create(SkelverModule.create(cryptoService, blockChainManager, peerManager, scheduler, stateManager, communicator, transactionManager));
@@ -64,6 +71,11 @@ export class SkelverNode {
         this._app.useGlobalFilters(new GlobalExceptionFilter());
 
         return this._app;
+    }
+
+    private async initializeBlockchain(transactionManager: ITransactionManager, cryptoService: ICryptoService) : Promise<void>{
+        let genesisTransaction = await transactionManager.createTransactionAsync(null, cryptoService.publicKeyHash, 500000, cryptoService.privateKey);
+        transactionManager.addTransaction(genesisTransaction);
     }
 
     async start() {

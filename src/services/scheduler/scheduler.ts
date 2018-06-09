@@ -1,4 +1,4 @@
-import { Inject, Component } from "@nestjs/common";
+import { Inject, Component, Injectable } from "@nestjs/common";
 import DI from "../../di";
 import { IPeerManager } from "../peers/peerManager";
 import { IBlockChainManager } from "../blockchain/blockChainManager";
@@ -13,7 +13,7 @@ export interface IScheduler{
     stopOutputTask(): void;
 }
 
-@Component()
+@Injectable()
 export class Scheduler implements IScheduler {
 
     private _gossipInterval: NodeJS.Timer;

@@ -1,13 +1,13 @@
 import State from "../state/state";
 import * as rc from "typed-rest-client/RestClient";
-import { Component } from "@nestjs/common";
+import { Component, Injectable } from "@nestjs/common";
 
 export interface ICommunicator{
     gossipAsync(address: string, state: State): Promise<boolean>;
     getPublicKeyAsync(address: string): Promise<string>;
 }
 
-@Component()
+@Injectable()
 export class HttpCommunicator implements ICommunicator {
 
     public async gossipAsync(address: string, state: State): Promise<boolean> {

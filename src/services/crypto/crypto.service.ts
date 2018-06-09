@@ -1,10 +1,12 @@
 import KeyPair from "./keypair";
 import * as Rsa from "node-rsa";
 import * as crypto from "crypto";
+import { Component, Injectable } from "@nestjs/common";
     
 export interface ICryptoService{
     privateKey: string;
     publicKey: string;
+    publicKeyHash: string;
     generateKeyPairAsync(): Promise<void>;
     signAsync(plainText: string, privateKey: string): Promise<string>;
     decryptAsync(cypherText:string, publicKey:string): Promise<string>;
@@ -12,9 +14,11 @@ export interface ICryptoService{
     hash(data: string): string;
 }
 
+@Injectable()
 export class RsaCryptoService implements ICryptoService {
     public privateKey: string;
     public publicKey: string;
+    public publicKeyHash: string;
 
     generateKeyPairAsync(): Promise<void> {
 
@@ -22,6 +26,7 @@ export class RsaCryptoService implements ICryptoService {
             let key = new Rsa({ b: 2048 });
             this.privateKey = key.exportKey("private");
             this.publicKey = key.exportKey("public");
+            this.publicKeyHash = this.hash(this.publicKey);
             resolve();
         });
         

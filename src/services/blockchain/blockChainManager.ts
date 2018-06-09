@@ -1,50 +1,38 @@
 import BlockChain from "./blockchain";
 import { IPeerManager } from "../peers/peerManager";
 import { IStateManager, StateManager } from "../state/stateManager";
-import { Inject, Component } from "@nestjs/common";
+import { Inject, Component, Injectable } from "@nestjs/common";
 import DI from "../../di";
 import Block from "./block";
-import { Output, Transaction } from "../transaction/transaction";
+import { Transaction } from "../transaction/transaction";
 import { ICryptoService } from "../crypto/crypto.service";
+import * as _ from "lodash";
+import { ITransactionManager } from "../transaction/transactionManager";
 
 export interface IBlockChainManager{
-    initialize(publicKey: string, privateKey: string): void;
     updateBlockChain(blockChain: BlockChain): void;
     addBlock(block: Block): void;
+    getTopBlock(): Block;
 }
 
-@Component()
+@Injectable()
 export class BlockChainManager implements IBlockChainManager {
 
     private _blockChain: BlockChain;
     private _stateManager: IStateManager;
     private _cryptoService: ICryptoService;
+    private _transactionManager: ITransactionManager;
 
-    constructor(@Inject(DI.IStateManager) stateManager: IStateManager, @Inject(DI.ICryptoService) cryptoService: ICryptoService) {
+    constructor(@Inject(DI.IStateManager) stateManager: IStateManager,
+                @Inject(DI.ICryptoService) cryptoService: ICryptoService,
+                @Inject(DI.ITransactionManager) transactionManager: ITransactionManager) {
+        
         this._blockChain = new BlockChain();
         this._blockChain.blocks = new Array<Block>();
         
         this._stateManager = stateManager;
         this._cryptoService = cryptoService;
-    }
-
-    public initialize(publicKey: string, privateKey: string): void {
-        // create genesis block
-        let genesisBlock = new Block();
-        genesisBlock.prevHash = null;
-        genesisBlock.transactions = new Array<Transaction>();
-        
-        // create first transaction
-        let firstTransaction = new Transaction({
-            outputs: new Array<Output>(new Output({ to: publicKey, amount: 500000 })),
-            inputs: null
-        });
-
-        firstTransaction.id = this._cryptoService.hash(JSON.stringify(firstTransaction));
-
-        genesisBlock.transactions.push(firstTransaction);
-        this._blockChain.blocks.push(genesisBlock);
-        this.persistState();
+        this._transactionManager = transactionManager;
     }
 
     public updateBlockChain(blockChain: BlockChain): void {
@@ -55,17 +43,29 @@ export class BlockChainManager implements IBlockChainManager {
     }
 
     public addBlock(block: Block): void{
+        console.log("adding block");
         if (!this.validateBlock(block)) {
             //TODO: Log
             return;
         }
 
         this._blockChain.blocks.push(block);
+        this._transactionManager.removeTransaction(block.transaction.id);
         this.persistState();
+        console.log("persist done");
+    }
+
+    public getTopBlock(): Block {
+        if (!this._blockChain || !this._blockChain.blocks || this._blockChain.blocks.length == 0)
+            return null;
+        
+        return _.clone(_.last(this._blockChain.blocks));
     }
 
     private validateBlock(block: Block) {
-        return true;
+        return block
+            && block.hash
+            && block.transaction;
     }
 
     private validateChain(blockChain: BlockChain): boolean {

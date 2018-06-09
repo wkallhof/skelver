@@ -7,7 +7,7 @@ export default class State{
     public peers: Array<NodeInfo> = new Array<NodeInfo>();
     public transactions: Array<Transaction> = new Array<Transaction>();
     public node: NodeInfo = new NodeInfo();
-    public difficulty: number = 4;
+    public difficulty: number = 5;
 
     public constructor(init?:Partial<State>) {
         Object.assign(this, init);

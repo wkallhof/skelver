@@ -1,6 +1,6 @@
 import NodeInfo from "./nodeInfo";
 import { IStateManager } from "../state/stateManager";
-import { Inject, Component } from "@nestjs/common";
+import { Inject, Component, Injectable } from "@nestjs/common";
 import DI from "../../di";
 import { ICommunicator } from "./communicator";
 import * as _ from "lodash";
@@ -12,7 +12,7 @@ export interface IPeerManager{
     cleanUp(): void;
 }
 
-@Component()
+@Injectable()
 export class PeerManager implements IPeerManager {
 
     private _peers: Array<NodeInfo>;

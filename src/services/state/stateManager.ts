@@ -2,7 +2,7 @@ import State from "./state";
 import NodeInfo from "../peers/nodeInfo";
 import BlockChain from "../blockchain/blockchain";
 import {Transaction} from "../transaction/transaction";
-import { Component } from "@nestjs/common";
+import { Component, Injectable } from "@nestjs/common";
 
 export interface IStateManager{
     getState(): State;
@@ -12,7 +12,7 @@ export interface IStateManager{
     updateTransactions(transactions: Array<Transaction>): void;
 }
 
-@Component()
+@Injectable()
 export class StateManager implements IStateManager {
 
     private _state: State;
